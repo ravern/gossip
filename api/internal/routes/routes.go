@@ -24,7 +24,8 @@ func Configure(router chi.Router, config *Config) {
 	}))
 
 	router.Post("/auth/register", handlers.Register)
-	router.Post("/auth/login", func(w http.ResponseWriter, r *http.Request) {})
-	router.Get("/user", func(w http.ResponseWriter, r *http.Request) {})
+	router.Post("/auth/login", handlers.Login)
+	router.With(middleware.SetUser, middleware.ProtectHandler).Get("/users/{id}", handlers.GetUser)
+	router.With(middleware.SetUser, middleware.ProtectHandler).Get("/user", handlers.GetCurrentUser)
 	router.Put("/user", func(w http.ResponseWriter, r *http.Request) {})
 }

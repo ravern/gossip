@@ -12,6 +12,7 @@ import (
 type Config struct {
 	Port        string
 	DatabaseURL string
+	JWTSecret   []byte
 	BcryptCost  int
 }
 
@@ -35,6 +36,14 @@ func Load(logger zerolog.Logger) (*Config, error) {
 		return nil, err
 	}
 
+	jwtSecretString := os.Getenv("JWT_SECRET")
+	if jwtSecretString == "" {
+		err := fmt.Errorf("missing JWT_SECRET")
+		logger.Error().Msg("missing JWT_SECRET")
+		return nil, err
+	}
+	jwtSecret := []byte(jwtSecretString)
+
 	bcryptCostString := os.Getenv("BCRYPT_COST")
 	var bcryptCost int
 	if bcryptCostString == "" {
@@ -51,6 +60,7 @@ func Load(logger zerolog.Logger) (*Config, error) {
 	return &Config{
 		Port:        port,
 		DatabaseURL: databaseURL,
+		JWTSecret:   jwtSecret,
 		BcryptCost:  bcryptCost,
 	}, nil
 }
