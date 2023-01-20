@@ -175,7 +175,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.WriteJSON(w, &getUserPayload{user})
+	response.WriteJSON(w, &getUserPayload{User: user})
 }
 
 func GetCurrentUser(w http.ResponseWriter, r *http.Request) {

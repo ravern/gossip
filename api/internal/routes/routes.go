@@ -26,4 +26,8 @@ func Configure(router chi.Router, config *Config) {
 	router.With(middleware.SetUser, middleware.ProtectHandler).Get("/users/{id}", handlers.GetUser)
 	router.With(middleware.SetUser, middleware.ProtectHandler).Get("/user", handlers.GetCurrentUser)
 	router.With(middleware.SetUser, middleware.ProtectHandler).Put("/user", handlers.UpdateCurrentUser)
+
+	router.With(middleware.SetUser, middleware.ProtectHandler).Post("/posts", handlers.CreatePost)
+	router.Get("/posts", handlers.GetAllPosts)
+	router.Get("/posts/{id}", handlers.GetPost)
 }
