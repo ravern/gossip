@@ -22,6 +22,7 @@ type createPostBody struct {
 func CreatePost(w http.ResponseWriter, r *http.Request) {
 	db := middleware.GetDB(r)
 	logger := middleware.GetLogger(r)
+	user := middleware.GetUser(r)
 
 	var b createPostBody
 	err := json.NewDecoder(r.Body).Decode(&b)
@@ -38,9 +39,10 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post := database.Post{
-		Title: b.Title,
-		Body:  b.Body,
-		Tags:  b.Tags,
+		Title:    b.Title,
+		Body:     b.Body,
+		Tags:     b.Tags,
+		AuthorID: user.ID,
 	}
 
 	if result := db.Create(&post); result.Error != nil {
@@ -90,4 +92,66 @@ func GetPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.WriteJSON(w, &getPostPayload{Post: post})
+}
+
+type updatePostBody struct {
+	Title *string  `json:"title"`
+	Body  *string  `json:"body"`
+	Tags  []string `json:"tags"`
+}
+
+func UpdatePost(w http.ResponseWriter, r *http.Request) {
+	db := middleware.GetDB(r)
+	logger := middleware.GetLogger(r)
+	user := middleware.GetUser(r)
+
+	id := chi.URLParam(r, "id")
+
+	var b updatePostBody
+	err := json.NewDecoder(r.Body).Decode(&b)
+	if err != nil {
+		logger.Warn().Err(err).Msg("bad request")
+		response.JSONError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	if err := validate.New().Struct(&b); err != nil {
+		logger.Warn().Err(err).Msg("bad request")
+		response.JSONError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	var post database.Post
+	if result := db.Where("id = ?", id).First(&post); result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			err := errors.New("post not found")
+			logger.Warn().Err(err).Msg("not found")
+			response.JSONError(w, err, http.StatusNotFound)
+		} else {
+			logger.Error().Err(result.Error).Msg("failed to fetch post")
+			response.InternalServerError(w)
+		}
+		return
+	}
+
+	if user.Role == database.NormalRole && post.AuthorID != user.ID {
+		err := errors.New("can only update own post")
+		logger.Warn().Err(err).Msg("unauthorized")
+		response.JSONError(w, err, http.StatusUnauthorized)
+		return
+	}
+
+	if b.Title != nil {
+		post.Title = *b.Title
+	}
+	if b.Body != nil {
+		post.Body = *b.Body
+	}
+	if b.Tags != nil {
+		post.Tags = b.Tags
+	}
+
+	db.Updates(post)
+
+	response.WriteJSON(w, post)
 }
