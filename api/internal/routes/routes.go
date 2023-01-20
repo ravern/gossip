@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"net/http"
-
 	"github.com/go-chi/chi"
 	"github.com/ravern/gossip/v2/internal/handlers"
 	"github.com/ravern/gossip/v2/internal/middleware"
@@ -27,5 +25,5 @@ func Configure(router chi.Router, config *Config) {
 	router.Post("/auth/login", handlers.Login)
 	router.With(middleware.SetUser, middleware.ProtectHandler).Get("/users/{id}", handlers.GetUser)
 	router.With(middleware.SetUser, middleware.ProtectHandler).Get("/user", handlers.GetCurrentUser)
-	router.Put("/user", func(w http.ResponseWriter, r *http.Request) {})
+	router.With(middleware.SetUser, middleware.ProtectHandler).Put("/user", handlers.UpdateCurrentUser)
 }

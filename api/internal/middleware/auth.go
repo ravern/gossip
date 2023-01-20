@@ -3,12 +3,11 @@ package middleware
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/ravern/gossip/v2/internal/database"
+	"github.com/ravern/gossip/v2/internal/jwt"
 	"github.com/ravern/gossip/v2/internal/response"
 )
 
@@ -37,20 +36,9 @@ func SetUser(next http.Handler) http.Handler {
 			return
 		}
 
-		token, err := jwt.ParseWithClaims(authorizationComponents[1], &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
-			return jwtSecret, nil
-		})
+		claims, err := jwt.Parse(jwtSecret, authorizationComponents[1])
 		if err != nil {
 			response.JSONError(w, err, http.StatusUnauthorized)
-			return
-		}
-
-		claims, ok := token.Claims.(*jwt.RegisteredClaims)
-		if !ok || !token.Valid {
-			response.JSONError(w, errors.New("invalid token provided"), http.StatusUnauthorized)
 			return
 		}
 

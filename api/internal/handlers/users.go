@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/ravern/gossip/v2/internal/database"
+	"github.com/ravern/gossip/v2/internal/jwt"
 	"github.com/ravern/gossip/v2/internal/middleware"
 	"github.com/ravern/gossip/v2/internal/response"
 	"gorm.io/gorm"
@@ -18,15 +18,21 @@ import (
 
 type registerBody struct {
 	Handle    string  `json:"handle" validate:"required"`
-	Email     string  `json:"email" validate:"email"`
+	Email     string  `json:"email" validate:"omitempty,email"`
 	Password  string  `json:"password" validate:"required"`
 	AvatarURL *string `json:"avatar_url"`
+}
+
+type registerPayload struct {
+	User  database.User `json:"user"`
+	Token string        `json:"token"`
 }
 
 func Register(w http.ResponseWriter, r *http.Request) {
 	db := middleware.GetDB(r)
 	logger := middleware.GetLogger(r)
 	bcryptCost := middleware.GetBcryptCost(r)
+	jwtSecret := middleware.GetJWTSecret(r)
 
 	var b registerBody
 	err := json.NewDecoder(r.Body).Decode(&b)
@@ -63,7 +69,17 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.WriteJSON(w, user)
+	token, err := jwt.Sign(jwtSecret, user)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to sign token")
+		response.InternalServerError(w)
+		return
+	}
+
+	response.WriteJSON(w, &registerPayload{
+		Token: token,
+		User:  user,
+	})
 }
 
 type loginBody struct {
@@ -123,8 +139,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{ID: user.ID.String()})
-	tokenString, err := token.SignedString([]byte(jwtSecret))
+	token, err := jwt.Sign(jwtSecret, user)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to sign token")
 		response.InternalServerError(w)
@@ -132,8 +147,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.WriteJSON(w, &loginPayload{
+		Token: token,
 		User:  user,
-		Token: tokenString,
 	})
 }
 
@@ -168,4 +183,54 @@ func GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, user)
 }
 
-func UpdateCurrentUser(w http.ResponseWriter, r *http.Request) {}
+type updateCurrentUserBody struct {
+	Handle    *string `json:"handle"`
+	Email     *string `json:"email" validate:"omitempty,email"`
+	Password  *string `json:"password"`
+	AvatarURL *string `json:"avatar_url"`
+}
+
+func UpdateCurrentUser(w http.ResponseWriter, r *http.Request) {
+	db := middleware.GetDB(r)
+	logger := middleware.GetLogger(r)
+	bcryptCost := middleware.GetBcryptCost(r)
+	user := middleware.GetUser(r)
+
+	var b updateCurrentUserBody
+	err := json.NewDecoder(r.Body).Decode(&b)
+	if err != nil {
+		logger.Warn().Err(err).Msg("bad request")
+		response.JSONError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	if err := validate.New().Struct(&b); err != nil {
+		logger.Warn().Err(err).Msg("bad request")
+		response.JSONError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	if b.Handle != nil {
+		user.Handle = *b.Handle
+	}
+	if b.Email != nil {
+		user.Email = *b.Email
+	}
+	if b.Password != nil {
+		passwordHash, err := bcrypt.GenerateFromPassword([]byte(*b.Password), bcryptCost)
+		if err != nil {
+			logger.Error().Err(err).Msg("failed to generate password hash")
+			response.InternalServerError(w)
+			return
+		}
+		passwordHashString := string(passwordHash)
+		user.PasswordHash = &passwordHashString
+	}
+	if b.AvatarURL != nil {
+		user.AvatarURL = b.AvatarURL
+	}
+
+	db.Updates(user)
+
+	response.WriteJSON(w, user)
+}
