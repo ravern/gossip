@@ -23,12 +23,27 @@ func Configure(router chi.Router, config *Config) {
 
 	router.Post("/auth/register", handlers.Register)
 	router.Post("/auth/login", handlers.Login)
+
 	router.With(middleware.SetUser, middleware.ProtectHandler).Get("/users/{id}", handlers.GetUser)
+
 	router.With(middleware.SetUser, middleware.ProtectHandler).Get("/user", handlers.GetCurrentUser)
 	router.With(middleware.SetUser, middleware.ProtectHandler).Put("/user", handlers.UpdateCurrentUser)
 
-	router.With(middleware.SetUser, middleware.ProtectHandler).Post("/posts", handlers.CreatePost)
-	router.With(middleware.SetUser, middleware.ProtectHandler).Put("/posts/{id}", handlers.UpdatePost)
-	router.Get("/posts", handlers.GetAllPosts)
-	router.Get("/posts/{id}", handlers.GetPost)
+	router.Route("/posts", func(router chi.Router) {
+		router.With(middleware.SetUser, middleware.ProtectHandler).Post("/", handlers.CreatePost)
+		router.With(middleware.SetUser, middleware.ProtectHandler).Put("/{id}", handlers.UpdatePost)
+		router.With(middleware.SetUser, middleware.ProtectHandler).Delete("/{id}", handlers.DeletePost)
+		router.Get("/", handlers.GetAllPosts)
+		router.Get("/{id}", handlers.GetPost)
+		router.With(middleware.SetUser, middleware.ProtectHandler).Post("/{id}/likes", handlers.LikePost)
+	})
+
+	router.Route("/posts/{postID}/comments", func(router chi.Router) {
+		router.With(middleware.SetUser, middleware.ProtectHandler).Post("/", handlers.CreateComment)
+		router.With(middleware.SetUser, middleware.ProtectHandler).Put("/{id}", handlers.UpdateComment)
+		router.With(middleware.SetUser, middleware.ProtectHandler).Delete("/{id}", handlers.DeleteComment)
+		router.Get("/", handlers.GetAllComments)
+		router.Get("/{id}", handlers.GetComment)
+		router.With(middleware.SetUser, middleware.ProtectHandler).Post("/{id}/likes", handlers.LikeComment)
+	})
 }

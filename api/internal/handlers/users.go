@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -9,14 +8,14 @@ import (
 	"github.com/ravern/gossip/v2/internal/database"
 	"github.com/ravern/gossip/v2/internal/jwt"
 	"github.com/ravern/gossip/v2/internal/middleware"
+	"github.com/ravern/gossip/v2/internal/request"
 	"github.com/ravern/gossip/v2/internal/response"
 	"gorm.io/gorm"
 
-	validate "github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type registerBody struct {
+type RegisterBody struct {
 	Handle    string  `json:"handle" validate:"required"`
 	Email     string  `json:"email" validate:"omitempty,email"`
 	Password  string  `json:"password" validate:"required"`
@@ -34,15 +33,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	bcryptCost := middleware.GetBcryptCost(r)
 	jwtSecret := middleware.GetJWTSecret(r)
 
-	var b registerBody
-	err := json.NewDecoder(r.Body).Decode(&b)
-	if err != nil {
-		logger.Warn().Err(err).Msg("bad request")
-		response.JSONError(w, err, http.StatusBadRequest)
-		return
-	}
-
-	if err := validate.New().Struct(&b); err != nil {
+	var b RegisterBody
+	if err := request.DecodeBody(r, &b); err != nil {
 		logger.Warn().Err(err).Msg("bad request")
 		response.JSONError(w, err, http.StatusBadRequest)
 		return
@@ -82,7 +74,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-type loginBody struct {
+type LoginBody struct {
 	HandleOrEmail string `json:"handle_or_email" validate:"required"`
 	Password      string `json:"password" validate:"required"`
 }
@@ -97,15 +89,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	logger := middleware.GetLogger(r)
 	jwtSecret := middleware.GetJWTSecret(r)
 
-	var b loginBody
-	err := json.NewDecoder(r.Body).Decode(&b)
-	if err != nil {
-		logger.Warn().Err(err).Msg("bad request")
-		response.JSONError(w, err, http.StatusBadRequest)
-		return
-	}
-
-	if err := validate.New().Struct(&b); err != nil {
+	var b LoginBody
+	if err := request.DecodeBody(r, &b); err != nil {
 		logger.Warn().Err(err).Msg("bad request")
 		response.JSONError(w, err, http.StatusBadRequest)
 		return
@@ -183,7 +168,7 @@ func GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	response.WriteJSON(w, user)
 }
 
-type updateCurrentUserBody struct {
+type UpdateCurrentUserBody struct {
 	Handle    *string `json:"handle"`
 	Email     *string `json:"email" validate:"omitempty,email"`
 	Password  *string `json:"password"`
@@ -196,15 +181,8 @@ func UpdateCurrentUser(w http.ResponseWriter, r *http.Request) {
 	bcryptCost := middleware.GetBcryptCost(r)
 	user := middleware.GetUser(r)
 
-	var b updateCurrentUserBody
-	err := json.NewDecoder(r.Body).Decode(&b)
-	if err != nil {
-		logger.Warn().Err(err).Msg("bad request")
-		response.JSONError(w, err, http.StatusBadRequest)
-		return
-	}
-
-	if err := validate.New().Struct(&b); err != nil {
+	var b UpdateCurrentUserBody
+	if err := request.DecodeBody(r, &b); err != nil {
 		logger.Warn().Err(err).Msg("bad request")
 		response.JSONError(w, err, http.StatusBadRequest)
 		return

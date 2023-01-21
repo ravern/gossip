@@ -14,7 +14,8 @@ type Post struct {
 	Body      string         `gorm:"not null" json:"body"`
 	Tags      pq.StringArray `gorm:"type:text[];not null" json:"tags"`
 	AuthorID  uuid.UUID      `gorm:"not null" json:"-"`
-	Author    *User
+	Author    *User          `json:"-"`
+	PostLikes []PostLike     `json:"likes"`
 	CreatedAt time.Time      `gorm:"not null" json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
