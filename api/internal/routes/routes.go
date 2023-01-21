@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 	"github.com/ravern/gossip/v2/internal/handlers"
 	"github.com/ravern/gossip/v2/internal/middleware"
 	"github.com/rs/zerolog"
@@ -15,6 +16,14 @@ type Config struct {
 }
 
 func Configure(router chi.Router, config *Config) {
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300,
+	}))
 	router.Use(middleware.Context(&middleware.ContextConfig{
 		DB:         config.DB,
 		Logger:     config.Logger,
