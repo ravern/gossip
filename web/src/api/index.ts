@@ -3,7 +3,7 @@ import { QueryClient } from "react-query";
 
 import Config from "src/config";
 
-const LOCAL_STORAGE_KEY_ACCESS_TOKEN = "accessToken";
+export const LOCAL_STORAGE_KEY_ACCESS_TOKEN = "accessToken";
 
 export const axiosClient = Axios.create({
   baseURL: Config.api.baseURL,
@@ -12,9 +12,10 @@ export const axiosClient = Axios.create({
 axiosClient.defaults.headers.common["Content-Type"] = "application/json";
 axiosClient.interceptors.request.use(
   (config: AxiosRequestConfig): AxiosRequestConfig => {
-    config.headers["Authorization"] = `Bearer ${localStorage.getItem(
-      LOCAL_STORAGE_KEY_ACCESS_TOKEN
-    )}`;
+    const accessToken = localStorage.getItem(LOCAL_STORAGE_KEY_ACCESS_TOKEN);
+    if (accessToken != null) {
+      config.headers["Authorization"] = `Bearer ${accessToken}`;
+    }
     return config;
   }
 );
