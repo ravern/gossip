@@ -61,6 +61,7 @@ export default function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
             label="Handle or Email"
             fullWidth
             variant="standard"
+            value={handleOrEmail}
             onChange={handleHandleOrEmailChange}
           />
           <TextField
@@ -69,6 +70,7 @@ export default function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
             type="password"
             fullWidth
             variant="standard"
+            value={password}
             onChange={handlePasswordChange}
           />
         </DialogContent>

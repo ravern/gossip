@@ -5,11 +5,16 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import { queryClient } from "src/api";
 import HomePage from "src/pages/Home";
+import NewPostPage from "src/pages/NewPost";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <HomePage />,
+  },
+  {
+    path: "/posts/new",
+    element: <NewPostPage />,
   },
 ]);
 
