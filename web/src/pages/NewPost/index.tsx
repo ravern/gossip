@@ -1,9 +1,23 @@
-import { Container, TextareaAutosize, TextField } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Container,
+  TextField,
+  Typography,
+} from "@mui/material";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
+import useCreatePostMutation from "src/api/mutations/createPost";
 import BaseLayout from "src/layouts/Base";
 
 export default function NewPostPage() {
+  const navigate = useNavigate();
+
+  const { mutateAsync: createPost, isLoading } = useCreatePostMutation();
+
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
@@ -17,32 +31,50 @@ export default function NewPostPage() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    createPost({ title, body, tags: [] })
+      .then(() => {
+        navigate("/");
+      })
+      .catch(console.error);
   };
 
   return (
     <BaseLayout>
-      <Container maxWidth="md">
-        <form onSubmit={handleSubmit}>
-          <TextField
-            margin="dense"
-            autoFocus
-            label="Title"
-            fullWidth
-            variant="standard"
-            value={title}
-            onChange={handleTitleChange}
-          />
-          <TextField
-            margin="dense"
-            autoFocus
-            label="Body"
-            fullWidth
-            variant="standard"
-            multiline
-            value={body}
-            onChange={handleBodyChange}
-          />
-        </form>
+      <Container maxWidth="sm">
+        <Card sx={{ marginTop: 1 }}>
+          <CardContent>
+            <form onSubmit={handleSubmit}>
+              <Typography variant="h5">Create New Post</Typography>
+              <TextField
+                margin="dense"
+                autoFocus
+                label="Title"
+                fullWidth
+                variant="standard"
+                value={title}
+                onChange={handleTitleChange}
+              />
+              <TextField
+                margin="dense"
+                label="Body"
+                fullWidth
+                variant="standard"
+                multiline
+                value={body}
+                onChange={handleBodyChange}
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                sx={{ marginTop: 1 }}
+              >
+                {isLoading ? <CircularProgress /> : <span>Create</span>}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </Container>
     </BaseLayout>
   );

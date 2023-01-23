@@ -7,6 +7,7 @@
     "build": "react-scripts build"
   },
   "devDependencies": {
+    "@types/luxon": "^3.2.0",
     "@types/node": "^16.7.13",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
@@ -26,6 +27,7 @@
     "@mui/icons-material": "^5.11.0",
     "@mui/material": "^5.11.5",
     "axios": "^1.2.3",
+    "luxon": "^3.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-query": "^3.39.2",

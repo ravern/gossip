@@ -24,12 +24,28 @@ export interface PostData {
   title: string;
   body?: string;
   likes: PostLikeData[];
+  comments: CommentData[];
   tags: string[];
+  author: UserData;
   created_at: string;
 }
 
 export interface PostLikeData {
   post_id: string;
+  user_id: string;
+  created_at: string;
+}
+
+export interface CommentData {
+  id: string;
+  body: string;
+  likes: CommentLikeData[];
+  author: UserData;
+  created_at: string;
+}
+
+export interface CommentLikeData {
+  comment_id: string;
   user_id: string;
   created_at: string;
 }

@@ -61,7 +61,7 @@ func GetAllPosts(w http.ResponseWriter, r *http.Request) {
 	logger := middleware.GetLogger(r)
 
 	var posts []database.Post
-	if result := db.Preload("PostLikes").Find(&posts); result.Error != nil {
+	if result := db.Preload("Comments").Preload("PostLikes").Preload("Author").Order("created_at DESC").Find(&posts); result.Error != nil {
 		logger.Error().Err(result.Error).Msg("failed to fetch posts")
 		response.InternalServerError(w)
 		return
@@ -81,7 +81,7 @@ func GetPost(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
 	var post database.Post
-	if result := db.Where("id = ?", id).First(&post); result.Error != nil {
+	if result := db.Where("id = ?", id).Preload("Comments").Preload("PostLikes").Preload("Author").First(&post); result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			err := errors.New("post not found")
 			logger.Warn().Err(err).Msg("not found")
@@ -242,7 +242,7 @@ func LikePost(w http.ResponseWriter, r *http.Request) {
 		db.Unscoped().Delete(&postLike)
 	}
 
-	if result := db.Where("id = ?", id).Preload("PostLikes").First(&post); result.Error != nil {
+	if result := db.Where("id = ?", id).Preload("Comments").Preload("PostLikes").Preload("Author").First(&post); result.Error != nil {
 		logger.Error().Err(result.Error).Msg("failed to fetch post")
 		response.InternalServerError(w)
 		return

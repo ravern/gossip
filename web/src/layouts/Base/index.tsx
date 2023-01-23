@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import useCurrentUserQuery from "src/api/queries/currentUser";
 import LoginDialog from "src/components/LoginDialog";
@@ -38,9 +38,14 @@ export default function BaseLayout({ children }: BaseLayoutProps) {
   return (
     <>
       <AppBar position="sticky">
-        <Container maxWidth="md">
+        <Container maxWidth="sm">
           <Toolbar disableGutters>
-            <Typography variant="h6" component="div">
+            <Typography
+              variant="h6"
+              component={Link}
+              to="/"
+              sx={{ color: "inherit", textDecoration: "none" }}
+            >
               Gossip
             </Typography>
             {currentUser != null ? (
@@ -48,7 +53,8 @@ export default function BaseLayout({ children }: BaseLayoutProps) {
                 <Button
                   color="inherit"
                   sx={{ marginLeft: 2 }}
-                  onClick={handleCreateClick}
+                  component={Link}
+                  to="/posts/new"
                 >
                   Create
                 </Button>
@@ -57,6 +63,7 @@ export default function BaseLayout({ children }: BaseLayoutProps) {
               </>
             ) : (
               <>
+                <Box sx={{ flexGrow: 1 }} />
                 <Button color="inherit" onClick={handleLoginClick}>
                   Login
                 </Button>

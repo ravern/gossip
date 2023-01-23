@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { queryClient } from "src/api";
 import HomePage from "src/pages/Home";
 import NewPostPage from "src/pages/NewPost";
+import PostPage from "src/pages/Post";
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
   {
     path: "/posts/new",
     element: <NewPostPage />,
+  },
+  {
+    path: "/posts/:id",
+    element: <PostPage />,
   },
 ]);
 

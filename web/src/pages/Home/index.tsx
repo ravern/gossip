@@ -7,7 +7,7 @@ import BaseLayout from "src/layouts/Base";
 export default function HomePage() {
   return (
     <BaseLayout>
-      <Container maxWidth="md">
+      <Container maxWidth="sm">
         <PostList />
       </Container>
     </BaseLayout>
