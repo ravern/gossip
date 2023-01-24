@@ -6,6 +6,7 @@ import type { DataResponse, PostData } from "../models";
 
 async function getPosts() {
   const response = await axiosClient.get<DataResponse<PostData[]>>("/posts");
+  console.log(response.data.data);
   return response.data.data;
 }
 

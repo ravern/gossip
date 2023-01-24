@@ -19,6 +19,7 @@ import { Link, useParams } from "react-router-dom";
 import useLikePostMutation from "src/api/mutations/likePost";
 import useCurrentUserQuery from "src/api/queries/currentUser";
 import usePostQuery from "src/api/queries/post";
+import CommentList from "src/components/CommentList";
 import BaseLayout from "src/layouts/Base";
 
 export default function PostPage() {
@@ -88,6 +89,7 @@ export default function PostPage() {
               </Button>
             </CardActions>
           </Card>
+          <CommentList postId={post.id} comments={post.comments} />
         </Container>
       </BaseLayout>
     );
