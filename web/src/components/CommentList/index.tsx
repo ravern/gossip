@@ -2,6 +2,7 @@ import { Card, CardContent, List } from "@mui/material";
 import React from "react";
 
 import { CommentData } from "src/api/models";
+import useCurrentUserQuery from "src/api/queries/currentUser";
 
 import CommentInput from "./components/CommentInput";
 import CommentListItem from "./components/CommentListItem";
@@ -12,22 +13,27 @@ export interface CommentListProps {
 }
 
 export default function CommentList({ postId, comments }: CommentListProps) {
-  console.log(comments);
+  const { data: currentUser } = useCurrentUserQuery();
+
   return (
     <Card sx={{ marginTop: 2 }}>
       <CardContent>
         <List>
-          {comments.map((comment) => {
-            return (
-              <CommentListItem
-                key={comment.id}
-                postId={postId}
-                comment={comment}
-              />
-            );
-          })}
+          {comments.length > 0 ? (
+            comments.map((comment) => {
+              return (
+                <CommentListItem
+                  key={comment.id}
+                  postId={postId}
+                  comment={comment}
+                />
+              );
+            })
+          ) : (
+            <>There are no comments yet.</>
+          )}
         </List>
-        <CommentInput postId={postId} />
+        {currentUser != null && <CommentInput postId={postId} />}
       </CardContent>
     </Card>
   );

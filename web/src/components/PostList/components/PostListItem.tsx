@@ -67,7 +67,7 @@ export default function PostListItem({ post }: PostListItemProps) {
             {post.likes.length}
           </Typography>
         </Button>
-        <Button size="small">
+        <Button size="small" component={Link} to={`/posts/${post.id}`}>
           <CommentIcon />
           <Typography variant="body1" marginLeft={1}>
             {post.comments.length}
