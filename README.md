@@ -1,5 +1,5 @@
-**This is a work in progress.**
-
 # Gossip
 
-Web forum and discussion platform
+*Koh Chan Hong (A0254616A)*
+
+Web forum and discussion platform.
