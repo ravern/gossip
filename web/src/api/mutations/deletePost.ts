@@ -14,8 +14,8 @@ async function deletePost(postId: string) {
 export default function useDeletePostMutation() {
   const queryClient = useQueryClient();
   return useMutation(deletePost, {
-    onSuccess: (_data, postId) => {
-      queryClient.refetchQueries(["posts", postId]);
+    onSuccess: () => {
+      queryClient.refetchQueries("posts");
     },
   });
 }

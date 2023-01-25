@@ -59,10 +59,10 @@ export default function RegisterDialog({
   return (
     <Dialog fullWidth maxWidth="xs" open={isOpen} onClose={onClose}>
       <form onSubmit={handleSubmit}>
-        <DialogTitle>Welcome back!</DialogTitle>
+        <DialogTitle>Create a new account!</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Please enter your credentials here.
+            Start your gossiping here today :)
           </DialogContentText>
           <TextField
             margin="dense"
@@ -75,7 +75,6 @@ export default function RegisterDialog({
           />
           <TextField
             margin="dense"
-            autoFocus
             label="Email"
             fullWidth
             variant="standard"
