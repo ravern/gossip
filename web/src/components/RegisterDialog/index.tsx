@@ -6,6 +6,7 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
+  Typography,
 } from "@mui/material";
 import React, { useState } from "react";
 
@@ -21,7 +22,7 @@ export default function RegisterDialog({
   isOpen,
   onClose,
 }: RegisterDialogProps) {
-  const { mutateAsync: register } = useRegisterMutation();
+  const { mutateAsync: register, error: registerError } = useRegisterMutation();
 
   const [handle, setHandle] = useState("");
   const [email, setEmail] = useState("");
@@ -90,6 +91,11 @@ export default function RegisterDialog({
             value={password}
             onChange={handlePasswordChange}
           />
+          {registerError != null && (
+            <Typography color="error" marginTop={1}>
+              Failed to register
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
           <Button type="submit">Register</Button>

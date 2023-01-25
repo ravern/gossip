@@ -6,6 +6,7 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
+  Typography,
 } from "@mui/material";
 import React, { useState } from "react";
 
@@ -18,7 +19,9 @@ export interface LoginDialogProps {
 }
 
 export default function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
-  const { mutateAsync: login } = useLoginMutation();
+  const { mutateAsync: login, error: loginError } = useLoginMutation();
+
+  console.log(loginError);
 
   const [handleOrEmail, setHandleOrEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -73,6 +76,11 @@ export default function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
             value={password}
             onChange={handlePasswordChange}
           />
+          {loginError != null && (
+            <Typography color="error" marginTop={1}>
+              Invalid credentials
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
           <Button type="submit">Login</Button>
