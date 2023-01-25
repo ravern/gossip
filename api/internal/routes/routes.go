@@ -12,6 +12,7 @@ import (
 type Config struct {
 	DB         *gorm.DB
 	Logger     zerolog.Logger
+	JWTSecret  []byte
 	BcryptCost int
 }
 
@@ -27,6 +28,7 @@ func Configure(router chi.Router, config *Config) {
 	router.Use(middleware.Context(&middleware.ContextConfig{
 		DB:         config.DB,
 		Logger:     config.Logger,
+		JWTSecret:  config.JWTSecret,
 		BcryptCost: config.BcryptCost,
 	}))
 

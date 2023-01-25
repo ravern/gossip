@@ -39,6 +39,7 @@ func run() error {
 	routes.Configure(router, &routes.Config{
 		DB:         db,
 		Logger:     logger,
+		JWTSecret:  config.JWTSecret,
 		BcryptCost: config.BcryptCost,
 	})
 

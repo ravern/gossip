@@ -18,8 +18,7 @@ type Config struct {
 
 func Load(logger zerolog.Logger) (*Config, error) {
 	if err := godotenv.Load(); err != nil {
-		logger.Error().Err(err).Msg("failed to load environment variables")
-		return nil, err
+		logger.Warn().Msg("failed to load environment variables from .env file")
 	}
 
 	port := os.Getenv("PORT")
