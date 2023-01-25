@@ -3,7 +3,8 @@ import React from "react";
 import { QueryClientProvider } from "react-query";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import { queryClient } from "src/api";
+import { LOCAL_STORAGE_KEY_ACCESS_TOKEN, queryClient } from "src/api";
+import { parse } from "src/jwt";
 import HomePage from "src/pages/Home";
 import NewPostPage from "src/pages/NewPost";
 import PostPage from "src/pages/Post";

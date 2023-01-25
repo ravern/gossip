@@ -1,9 +1,11 @@
 import {
   CommentOutlined as CommentIcon,
+  DeleteOutlined as DeleteOutlinedIcon,
   ThumbUp as ThumbUpIcon,
   ThumbUpOutlined as ThumbUpOutlinedIcon,
 } from "@mui/icons-material";
 import {
+  Box,
   Button,
   Card,
   CardActions,
@@ -14,6 +16,7 @@ import { DateTime } from "luxon";
 import React from "react";
 import { Link } from "react-router-dom";
 
+import useDeletePostMutation from "src/api/mutations/deletePost";
 import useLikePostMutation from "src/api/mutations/likePost";
 import useCurrentUserQuery from "src/api/queries/currentUser";
 
@@ -27,6 +30,7 @@ export default function PostListItem({ post }: PostListItemProps) {
   const { data: currentUser } = useCurrentUserQuery();
 
   const { mutateAsync: likePost } = useLikePostMutation();
+  const { mutateAsync: deletePost } = useDeletePostMutation();
 
   const isLiked = post.likes.some(({ user_id }) => currentUser?.id === user_id);
   const createdAt = DateTime.fromISO(post.created_at).toLocaleString(
@@ -34,9 +38,17 @@ export default function PostListItem({ post }: PostListItemProps) {
   );
 
   const handleLikeClick = () => {
-    likePost({ postId: post.id, isLiked: !isLiked })
-      .then(console.log)
-      .catch(console.error);
+    if (currentUser != null) {
+      likePost({ postId: post.id, isLiked: !isLiked })
+        .then(console.log)
+        .catch(console.error);
+    }
+  };
+
+  const handleDeleteClick = (postId: string) => () => {
+    if (currentUser != null && confirm("Are you sure?")) {
+      deletePost(postId).then(console.log).catch(console.error);
+    }
   };
 
   return (
@@ -61,7 +73,11 @@ export default function PostListItem({ post }: PostListItemProps) {
         </Typography>
       </CardContent>
       <CardActions>
-        <Button size="small" onClick={handleLikeClick}>
+        <Button
+          size="small"
+          onClick={handleLikeClick}
+          disabled={currentUser == null}
+        >
           {isLiked ? <ThumbUpIcon /> : <ThumbUpOutlinedIcon />}
           <Typography variant="body1" marginLeft={1}>
             {post.likes.length}
@@ -73,6 +89,19 @@ export default function PostListItem({ post }: PostListItemProps) {
             {post.comments.length}
           </Typography>
         </Button>
+        <Box sx={{ flexGrow: 1 }} />
+        {currentUser != null &&
+          (currentUser.role === "moderator" ||
+            currentUser.role === "admin" ||
+            currentUser.id === post.author.id) && (
+            <Button
+              size="small"
+              onClick={handleDeleteClick(post.id)}
+              disabled={currentUser == null}
+            >
+              <DeleteOutlinedIcon color="error" />
+            </Button>
+          )}
       </CardActions>
     </Card>
   );

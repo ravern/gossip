@@ -4,24 +4,21 @@ import { axiosClient } from "src/api";
 
 import { CommentData, DataResponse } from "../models";
 
-export interface CreateCommentParams {
+export interface DeleteCommentParams {
   postId: string;
-  body: string;
+  commentId: string;
 }
 
-async function createComment({ postId, body }: CreateCommentParams) {
-  const response = await axiosClient.post<DataResponse<CommentData>>(
-    `/posts/${postId}/comments`,
-    {
-      body,
-    }
+async function deleteComment({ postId, commentId }: DeleteCommentParams) {
+  const response = await axiosClient.delete<DataResponse<CommentData>>(
+    `/posts/${postId}/comments/${commentId}`
   );
   return response.data.data;
 }
 
-export default function useCreateCommentMutation() {
+export default function useDeleteCommentMutation() {
   const queryClient = useQueryClient();
-  return useMutation(createComment, {
+  return useMutation(deleteComment, {
     onSuccess: (_data, { postId }) => {
       queryClient.refetchQueries(["posts", postId]);
     },

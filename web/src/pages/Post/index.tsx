@@ -75,7 +75,11 @@ export default function PostPage() {
               </Typography>
             </CardContent>
             <CardActions>
-              <Button size="small" onClick={handleLikeClick}>
+              <Button
+                size="small"
+                onClick={handleLikeClick}
+                disabled={currentUser == null}
+              >
                 {isLiked ? <ThumbUpIcon /> : <ThumbUpOutlinedIcon />}
                 <Typography variant="body1" marginLeft={1}>
                   {post.likes.length}

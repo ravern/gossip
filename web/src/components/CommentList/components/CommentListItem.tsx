@@ -1,20 +1,13 @@
 import {
-  CommentOutlined as CommentIcon,
+  DeleteOutline as DeleteOutlinedIcon,
   ThumbUp as ThumbUpIcon,
   ThumbUpOutlined as ThumbUpOutlinedIcon,
 } from "@mui/icons-material";
-import {
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Divider,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Divider, Typography } from "@mui/material";
 import { DateTime } from "luxon";
 import React from "react";
-import { Link } from "react-router-dom";
 
+import useDeleteCommentMutation from "src/api/mutations/deleteComment";
 import useLikeCommentMutation from "src/api/mutations/likeComment";
 import useCurrentUserQuery from "src/api/queries/currentUser";
 
@@ -32,6 +25,7 @@ export default function CommentListItem({
   const { data: currentUser } = useCurrentUserQuery();
 
   const { mutateAsync: likeComment } = useLikeCommentMutation();
+  const { mutateAsync: deleteComment } = useDeleteCommentMutation();
 
   const isLiked = comment.likes.some(
     ({ user_id }) => currentUser?.id === user_id
@@ -41,9 +35,19 @@ export default function CommentListItem({
   );
 
   const handleLikeClick = () => {
-    likeComment({ postId, commentId: comment.id, isLiked: !isLiked })
-      .then(console.log)
-      .catch(console.error);
+    if (currentUser != null) {
+      likeComment({ postId, commentId: comment.id, isLiked: !isLiked })
+        .then(console.log)
+        .catch(console.error);
+    }
+  };
+
+  const handleDeleteClick = (commentId: string) => () => {
+    if (currentUser != null && confirm("Are you sure?")) {
+      deleteComment({ postId, commentId })
+        .then(console.log)
+        .catch(console.error);
+    }
   };
 
   return (
@@ -51,15 +55,36 @@ export default function CommentListItem({
       <Typography variant="body2" color="text.secondary" marginTop={1}>
         {comment.author.handle}
       </Typography>
-      <Typography variant="body1" color="text.secondary">
+      <Typography variant="body1" color="text.secondary" marginTop={1}>
         {comment.body}
       </Typography>
-      <Button size="small" onClick={handleLikeClick}>
+      <Typography variant="body2" color="text.secondary" marginTop={1}>
+        {createdAt}
+      </Typography>
+      <Button
+        size="small"
+        onClick={handleLikeClick}
+        disabled={currentUser == null}
+        sx={{ marginTop: 1 }}
+      >
         {isLiked ? <ThumbUpIcon /> : <ThumbUpOutlinedIcon />}
         <Typography variant="body1" marginLeft={1}>
           {comment.likes.length}
         </Typography>
       </Button>
+      {currentUser != null &&
+        (currentUser.role === "moderator" ||
+          currentUser.role === "admin" ||
+          currentUser.id === comment.author.id) && (
+          <Button
+            size="small"
+            onClick={handleDeleteClick(comment.id)}
+            disabled={currentUser == null}
+            sx={{ marginTop: 1 }}
+          >
+            <DeleteOutlinedIcon color="error" />
+          </Button>
+        )}
       <Divider sx={{ marginTop: 2 }} />
     </>
   );

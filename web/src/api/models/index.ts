@@ -15,6 +15,7 @@ export interface UserData {
 }
 
 export interface CurrentUserData extends UserData {
+  role: string;
   created_at: string;
   updated_at: string;
 }
